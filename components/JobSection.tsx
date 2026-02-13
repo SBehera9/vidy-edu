@@ -2,25 +2,9 @@
 import React, { useEffect, useState } from 'react';
 import { fetchJobNotifications, fetchExamUpdates } from '../services/eduService';
 import { JobNotification, AdmitCardResult } from '../types';
-import { Calendar, Building2, ExternalLink, Zap, MapPin, Briefcase, ChevronDown, RefreshCw, Loader2, ArrowRight, ShieldCheck, Search } from 'lucide-react';
+import { Calendar, Building2, ExternalLink, Zap, MapPin, Briefcase, ChevronDown, RefreshCw, Loader2, ArrowRight, ShieldCheck, Search, AlertCircle } from 'lucide-react';
 
 const ITEMS_PER_PAGE = 6;
-
-const SkeletonCard = () => (
-  <div className="bg-slate-50 p-4 sm:p-12 rounded-[2rem] sm:rounded-[4rem] border border-slate-100 flex flex-col h-[400px] sm:h-[520px] animate-pulse">
-    <div className="flex justify-between mb-6 sm:mb-10">
-      <div className="w-16 sm:w-24 h-4 sm:h-6 bg-slate-200 rounded-full"></div>
-      <div className="w-12 sm:w-20 h-4 sm:h-6 bg-slate-200 rounded-full"></div>
-    </div>
-    <div className="w-full h-6 sm:h-10 bg-slate-200 rounded-lg sm:rounded-xl mb-2 sm:mb-4"></div>
-    <div className="w-3/4 h-6 sm:h-10 bg-slate-200 rounded-lg sm:rounded-xl mb-6 sm:mb-12"></div>
-    <div className="flex-grow space-y-2 sm:space-y-4">
-      <div className="w-full h-2 sm:h-4 bg-slate-100 rounded-lg"></div>
-      <div className="w-2/3 h-2 sm:h-4 bg-slate-100 rounded-lg"></div>
-    </div>
-    <div className="mt-6 sm:mt-12 w-full h-10 sm:h-16 bg-slate-200 rounded-xl sm:rounded-2xl"></div>
-  </div>
-);
 
 const SyncingOverlay = ({ message }: { message: string }) => (
   <div className="col-span-full flex flex-col items-center justify-center py-20 sm:py-40 animate-in fade-in zoom-in duration-500">
@@ -34,7 +18,7 @@ const SyncingOverlay = ({ message }: { message: string }) => (
       </div>
     </div>
     <h3 className="text-xl sm:text-4xl font-black text-slate-900 mb-2 sm:mb-6 tracking-tight">Syncing Career Feed</h3>
-    <p className="text-slate-400 font-bold uppercase tracking-[0.2em] sm:tracking-[0.5em] text-[8px] sm:text-[12px] flex items-center gap-1 sm:gap-3">
+    <p className="text-slate-400 font-bold uppercase tracking-[0.2em] sm:tracking-[0.5em] text-[8px] sm:text-[12px] flex items-center gap-1 sm:gap-3 text-center">
        <div className="w-1 sm:w-2 h-1 sm:h-2 bg-emerald-500 rounded-full animate-pulse"></div> {message}
     </p>
   </div>
@@ -45,13 +29,26 @@ const JobSection: React.FC = () => {
   const [dataList, setDataList] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
+  const [error, setError] = useState<string | null>(null);
 
   const loadData = async () => {
     setLoading(true);
+    setError(null);
     try {
-      let results = activeTab === 'jobs' ? await fetchJobNotifications() : await fetchExamUpdates(activeTab === 'admit-cards' ? 'admit-card' : 'result');
-      setDataList(results || []);
-    } catch (e) { setDataList([]); }
+      let results = activeTab === 'jobs' 
+        ? await fetchJobNotifications() 
+        : await fetchExamUpdates(activeTab === 'admit-cards' ? 'admit-card' : 'result');
+      
+      if (!results || results.length === 0) {
+        setDataList([]);
+      } else {
+        setDataList(results);
+      }
+    } catch (e: any) { 
+      console.error("Load Error:", e);
+      setError(e.message || "Failed to sync with national database.");
+      setDataList([]); 
+    }
     finally { setLoading(false); }
   };
 
@@ -63,15 +60,15 @@ const JobSection: React.FC = () => {
         <div className="max-w-3xl">
           <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-8 text-indigo-600 font-extrabold text-[9px] sm:text-[11px] uppercase tracking-[0.3em] sm:tracking-[0.4em]">
             <div className="p-1.5 sm:p-2 bg-indigo-50 rounded-lg"><Zap className="w-3 h-3 sm:w-4 sm:h-4 fill-indigo-600" /></div>
-            Automated Career Sync
+            Verified National Data
           </div>
           <h2 className="text-4xl sm:text-6xl md:text-9xl font-black text-slate-900 tracking-tight leading-[0.85] mb-4 sm:mb-8">Career <br/><span className="text-indigo-600">Hub</span></h2>
-          <p className="text-slate-500 text-lg sm:text-2xl font-medium leading-relaxed max-w-2xl">Real-time alerts for 5,000+ government and private sector vacancies across India.</p>
+          <p className="text-slate-500 text-lg sm:text-2xl font-medium leading-relaxed max-w-2xl">Real-time alerts for verified Indian vacancies. Always free, always official.</p>
         </div>
         <button 
           onClick={loadData} 
           disabled={loading} 
-          className="group w-full sm:w-auto px-8 sm:px-10 py-4 sm:py-6 bg-slate-900 text-white rounded-[1.5rem] sm:rounded-[2rem] font-black uppercase text-[9px] sm:text-[11px] tracking-widest hover:bg-indigo-600 transition-all flex items-center justify-center gap-3 sm:gap-4 shadow-2xl shadow-slate-900/10 active:scale-95 disabled:opacity-50 btn-shine"
+          className="group w-full sm:w-auto px-8 sm:px-10 py-4 sm:py-6 bg-slate-900 text-white rounded-[1.5rem] sm:rounded-[2rem] font-black uppercase text-[9px] sm:text-[11px] tracking-widest hover:bg-indigo-600 transition-all flex items-center justify-center gap-3 sm:gap-4 shadow-2xl active:scale-95 disabled:opacity-50 btn-shine"
         >
           <RefreshCw className={`w-4 h-4 sm:w-5 sm:h-5 ${loading ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-700'}`} /> {loading ? 'Processing...' : 'Sync Latest Feed'}
         </button>
@@ -82,7 +79,7 @@ const JobSection: React.FC = () => {
           <button 
             key={tab} 
             onClick={() => { setActiveTab(tab as any); setVisibleCount(ITEMS_PER_PAGE); }}
-            className={`flex-1 py-3 sm:py-5 px-4 sm:px-10 rounded-[1.4rem] sm:rounded-[2rem] font-extrabold text-[9px] sm:text-[12px] uppercase tracking-widest transition-all duration-500 ${activeTab === tab ? 'bg-white text-slate-900 shadow-lg sm:shadow-xl scale-105' : 'text-slate-500 hover:text-slate-900 hover:scale-105'}`}
+            className={`flex-1 py-3 sm:py-5 px-4 sm:px-10 rounded-[1.4rem] sm:rounded-[2rem] font-extrabold text-[9px] sm:text-[12px] uppercase tracking-widest transition-all duration-500 ${activeTab === tab ? 'bg-white text-slate-900 shadow-lg scale-105' : 'text-slate-500 hover:text-slate-900 hover:scale-105'}`}
           >
             {tab.replace('-', ' ')}
           </button>
@@ -92,11 +89,13 @@ const JobSection: React.FC = () => {
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-10">
         {loading ? (
           <SyncingOverlay message={`Scanning National Boards for ${activeTab}...`} />
-        ) : dataList.length === 0 ? (
+        ) : (dataList.length === 0 || error) ? (
             <div className="col-span-full py-20 sm:py-32 text-center bg-slate-50 rounded-[2.5rem] sm:rounded-[4rem] border border-slate-100">
-               <ShieldCheck className="w-12 h-12 sm:w-20 sm:h-20 text-slate-200 mx-auto mb-4 sm:mb-8" />
-               <h3 className="text-xl sm:text-2xl font-extrabold text-slate-900 mb-2 sm:mb-4">Feed Syncing...</h3>
-               <p className="text-slate-500 text-xs sm:text-base font-medium max-w-xs sm:max-w-sm mx-auto">No vacancies found for today. Our AI is currently scanning official boards for upcoming alerts.</p>
+               {error ? <AlertCircle className="w-12 h-12 sm:w-20 sm:h-20 text-rose-300 mx-auto mb-4 sm:mb-8" /> : <ShieldCheck className="w-12 h-12 sm:w-20 sm:h-20 text-slate-200 mx-auto mb-4 sm:mb-8" />}
+               <h3 className="text-xl sm:text-2xl font-extrabold text-slate-900 mb-2 sm:mb-4">{error ? 'Sync Connection Failed' : 'Scanning Official Records...'}</h3>
+               <p className="text-slate-500 text-[10px] sm:text-base font-medium max-w-xs sm:max-w-sm mx-auto">
+                 {error ? "Please ensure your API_KEY is correctly set in Vercel settings and redeploy your project." : "No new notifications found in this category right now. Try refreshing in a few minutes."}
+               </p>
                <button onClick={loadData} className="mt-6 sm:mt-8 px-8 sm:px-10 py-3 sm:py-4 bg-slate-900 text-white rounded-xl sm:rounded-2xl font-black uppercase text-[8px] sm:text-[10px] tracking-widest hover:bg-indigo-600 transition-all">Retry Sync</button>
             </div>
           ) : (
@@ -115,7 +114,7 @@ const JobSection: React.FC = () => {
                   <div className="flex items-center gap-1.5 sm:gap-3 mb-2 sm:mb-4 text-[7px] sm:text-[11px] font-bold uppercase text-slate-400 tracking-widest">
                     <Building2 className="w-3 h-3 sm:w-4 sm:h-4 text-slate-300 shrink-0" /> <span className="truncate">{item.organization}</span>
                   </div>
-                  <h3 className="text-sm sm:text-3xl font-extrabold text-slate-900 leading-[1.2] sm:leading-[1.1] mb-2 sm:mb-6 group-hover:text-indigo-600 transition-colors line-clamp-3 tracking-tight">
+                  <h3 className="text-xs sm:text-2xl lg:text-3xl font-extrabold text-slate-900 leading-[1.2] sm:leading-[1.1] mb-2 sm:mb-6 group-hover:text-indigo-600 transition-colors line-clamp-3 tracking-tight">
                     {item.title}
                   </h3>
                   <p className="hidden sm:block text-slate-500 text-base font-medium leading-relaxed line-clamp-4 mb-8">
@@ -125,14 +124,14 @@ const JobSection: React.FC = () => {
 
                 <div className="mt-4 sm:mt-8 pt-4 sm:pt-10 border-t border-slate-50 flex flex-col gap-4 sm:gap-8">
                   <div className="flex justify-between items-center text-[7px] sm:text-[11px] font-black text-slate-400 uppercase tracking-widest">
-                    <span className="flex items-center gap-1.5 sm:gap-3"><Calendar className="w-3 h-3 sm:w-5 sm:h-5 text-indigo-500" /> <span className="truncate max-w-[40px] sm:max-w-none">{item.startDate || item.date || 'Update Found'}</span></span>
-                    <span className="text-emerald-500 flex items-center gap-1 sm:gap-2 font-black uppercase"><div className="w-1 sm:w-1.5 h-1 sm:h-1.5 rounded-full bg-emerald-500 animate-pulse"></div> Verified</span>
+                    <span className="flex items-center gap-1.5 sm:gap-3"><Calendar className="w-3 h-3 sm:w-5 sm:h-5 text-indigo-500" /> <span className="truncate max-w-[40px] sm:max-w-none">{item.startDate || item.date || 'LATEST'}</span></span>
+                    <span className="text-emerald-500 flex items-center gap-1 sm:gap-2 font-black uppercase"><div className="w-1 sm:w-1.5 h-1 sm:h-1.5 rounded-full bg-emerald-500 animate-pulse"></div> Official</span>
                   </div>
                   <a 
                     href={item.link || item.applyLink} 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="w-full py-3 sm:py-6 bg-slate-900 text-white rounded-[1rem] sm:rounded-[2rem] font-black uppercase text-[7px] sm:text-[11px] tracking-[0.2em] sm:tracking-[0.3em] flex items-center justify-center gap-2 sm:gap-4 hover:bg-indigo-600 transition-all shadow-xl shadow-indigo-500/5 active:scale-95 btn-shine"
+                    className="w-full py-3 sm:py-6 bg-slate-900 text-white rounded-[1rem] sm:rounded-[2rem] font-black uppercase text-[7px] sm:text-[11px] tracking-[0.2em] sm:tracking-[0.3em] flex items-center justify-center gap-2 sm:gap-4 hover:bg-indigo-600 transition-all shadow-xl active:scale-95 btn-shine"
                   >
                     Open Portal <ExternalLink className="w-3 h-3 sm:w-4 sm:h-4" />
                   </a>
