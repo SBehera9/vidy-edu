@@ -1,0 +1,16 @@
+
+{
+  "short_name": "Vidy",
+  "name": "Vidy | India's #1 Student Success Portal",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3143/3143560.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#4f46e5",
+  "background_color": "#ffffff"
+}

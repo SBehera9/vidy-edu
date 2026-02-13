@@ -1,0 +1,7 @@
+{
+  "name": "Vidy-Edu",
+  "description": "The professional, all-India educational gateway for students. Free access to jobs, syllabus, and academic research.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
