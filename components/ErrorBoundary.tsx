@@ -1,5 +1,5 @@
 
-import React, { Component, ErrorInfo, ReactNode } from 'react';
+import React, { ErrorInfo, ReactNode } from 'react';
 import { RefreshCcw, Home, ShieldAlert } from 'lucide-react';
 
 interface Props {
@@ -16,9 +16,9 @@ interface State {
 /**
  * World-class Error Boundary with empathetic UI and multi-path recovery.
  */
-// Explicitly extending React.Component with Props and State generics to ensure 'this.props' and 'this.state' are correctly typed and recognized by the TypeScript compiler.
+// Fix: Use React.Component to ensure that the class correctly inherits properties like 'props' and 'state' from the React base class.
 class ErrorBoundary extends React.Component<Props, State> {
-  // Use property initializer for state
+  // Fix: Removed 'override' keyword as it was causing issues when inheritance resolution failed in this environment.
   public state: State = {
     hasError: false
   };
@@ -32,8 +32,9 @@ class ErrorBoundary extends React.Component<Props, State> {
     return { hasError: true, error };
   }
 
+  // Fix: Removed 'override' keyword. This lifecycle method catches errors in the component tree.
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    // Accessing this.props is now safe as the class correctly inherits from React.Component<Props, State>.
+    // Accessing this.props is now valid as the class correctly inherits from React.Component.
     console.error(`[ErrorBoundary] Caught error in ${this.props.sectionName || 'Component'}:`, error, errorInfo);
   }
 
@@ -41,8 +42,9 @@ class ErrorBoundary extends React.Component<Props, State> {
     window.location.reload();
   };
 
+  // Fix: Removed 'override' keyword. The render method is required for React class components.
   public render() {
-    // Accessing this.state and this.props is now valid as the inheritance chain for generic types is properly defined.
+    // Accessing this.state and this.props is valid within class component methods.
     if (this.state.hasError) {
       return (
         <div className="min-h-[60vh] flex items-center justify-center p-6 animate-in fade-in zoom-in-95 duration-500">

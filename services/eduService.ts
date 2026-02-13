@@ -12,7 +12,45 @@ const getAI = () => {
 };
 
 /**
- * RESEARCH LAB: Omni-Search
+ * UTILITY: Extract JSON from a string that might contain markdown, text, or citations.
+ * This is crucial when using Google Search grounding as response.text is conversational.
+ */
+const extractJson = (text: string) => {
+  if (!text) return [];
+  try {
+    // 1. Try to find content between ```json and ```
+    const codeBlockMatch = text.match(/```json\s*([\s\S]*?)\s*```/);
+    if (codeBlockMatch && codeBlockMatch[1]) {
+      return JSON.parse(codeBlockMatch[1].trim());
+    }
+
+    // 2. Try to find content between any ``` and ```
+    const genericBlockMatch = text.match(/```\s*([\s\S]*?)\s*```/);
+    if (genericBlockMatch && genericBlockMatch[1]) {
+      // Basic check if it looks like JSON
+      const content = genericBlockMatch[1].trim();
+      if (content.startsWith('[') || content.startsWith('{')) {
+        return JSON.parse(content);
+      }
+    }
+
+    // 3. Last resort: find the first '[' and last ']' and parse that slice
+    const start = text.indexOf('[');
+    const end = text.lastIndexOf(']');
+    if (start !== -1 && end !== -1 && end > start) {
+      return JSON.parse(text.substring(start, end + 1));
+    }
+
+    // 4. Try parsing the whole thing if it's clean
+    return JSON.parse(text);
+  } catch (e) {
+    console.warn("JSON Extraction from text failed. Raw text:", text);
+    return [];
+  }
+};
+
+/**
+ * RESEARCH LAB: Omni-Search (Live Web)
  */
 export const academicSearch = async (query: string): Promise<SearchResult> => {
   const ai = getAI();
@@ -20,103 +58,74 @@ export const academicSearch = async (query: string): Promise<SearchResult> => {
     const response = await ai.models.generateContent({
       model: FLASH_MODEL,
       contents: `Perform a detailed internet search for: "${query}". 
-      Focus on academic accuracy and provide a professional report.`,
+      Focus on academic accuracy and provide a professional report for an Indian student.`,
       config: { tools: [{ googleSearch: {} }] }
     });
 
     const text = response.text || "No results found.";
     const sources = response.candidates?.[0]?.groundingMetadata?.groundingChunks
       ?.map((chunk: any) => ({
-        title: chunk.web?.title || 'Ref',
+        title: chunk.web?.title || 'Source',
         uri: chunk.web?.uri || '#'
       }))
       .filter((s: any) => s.uri !== '#') || [];
 
     return { text, sources };
   } catch (err) {
-    return { text: "Web sync failed. Please try again.", sources: [] };
+    return { text: "Web sync failed. Please check your connection and try again.", sources: [] };
   }
 };
 
 /**
- * JOB BOARD: Automatic Vacancy Fetcher
+ * JOB BOARD: Automatic Vacancy Fetcher (Live Web)
  */
 export const fetchJobNotifications = async (): Promise<JobNotification[]> => {
   const ai = getAI();
   const today = new Date().toLocaleDateString('en-IN');
   try {
+    // Note: Removed responseMimeType to avoid conflict with Search Grounding
     const response = await ai.models.generateContent({
       model: FLASH_MODEL,
-      contents: `Search for official government job vacancies in India released near ${today}. 
-      Prioritize links from .gov.in and .nic.in domains. Return a JSON array.`,
+      contents: `Search the live web for official government job vacancies in India active on ${today}. 
+      Target UPSC, SSC, Railway, and State PSCs. 
+      Return the results ONLY as a JSON array of objects with these keys: 
+      title, organization, location, state, startDate, endDate, applyLink (official .gov.in or .nic.in link), description.`,
       config: {
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.ARRAY,
-          items: {
-            type: Type.OBJECT,
-            properties: {
-              title: { type: Type.STRING },
-              organization: { type: Type.STRING },
-              location: { type: Type.STRING },
-              state: { type: Type.STRING },
-              startDate: { type: Type.STRING },
-              endDate: { type: Type.STRING },
-              applyLink: { type: Type.STRING },
-              description: { type: Type.STRING }
-            },
-            required: ["title", "organization", "state", "applyLink"]
-          }
-        },
         tools: [{ googleSearch: {} }]
       }
     });
 
-    return JSON.parse(response.text || "[]");
+    return extractJson(response.text);
   } catch (err) {
-    console.error("Job fetch failed:", err);
+    console.error("Job fetch error:", err);
     return [];
   }
 };
 
 /**
- * SYLLABUS: Precise Category Fetcher focus on Official links
+ * SYLLABUS: Precise Category Fetcher (Live Web)
  */
 export const fetchSyllabusByCategory = async (category: string): Promise<AdmitCardResult[]> => {
   const ai = getAI();
   try {
     const response = await ai.models.generateContent({
       model: FLASH_MODEL,
-      contents: `Find OFFICIAL curriculum PDF links for: "${category}" in India. 
-      ONLY include official boards (CBSE, ICSE, NCERT) or University portals (.edu.in, .ac.in, .gov.in).
-      Return a JSON array of objects with title, organization, date, and link.`,
+      contents: `Search for the latest OFFICIAL curriculum PDF links for: "${category}" in India. 
+      Target CBSE, ICSE, NCERT or verified University portals. 
+      Return the results ONLY as a JSON array of objects: title, organization, date, link.`,
       config: {
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.ARRAY,
-          items: {
-            type: Type.OBJECT,
-            properties: {
-              title: { type: Type.STRING },
-              organization: { type: Type.STRING },
-              date: { type: Type.STRING },
-              link: { type: Type.STRING }
-            },
-            required: ["title", "organization", "link"]
-          }
-        },
         tools: [{ googleSearch: {} }]
       }
     });
-    return JSON.parse(response.text || "[]");
+    return extractJson(response.text);
   } catch (err) {
-    console.error("Syllabus fetch failed:", err);
+    console.error("Syllabus fetch error:", err);
     return [];
   }
 };
 
 /**
- * EXAM UPDATES: Admit Cards & Results
+ * EXAM UPDATES: Admit Cards & Results (Live Web)
  */
 export const fetchExamUpdates = async (type: 'admit-card' | 'result'): Promise<AdmitCardResult[]> => {
   const ai = getAI();
@@ -128,59 +137,33 @@ export const fetchExamUpdates = async (type: 'admit-card' | 'result'): Promise<A
 
     const response = await ai.models.generateContent({
       model: FLASH_MODEL,
-      contents: query + " Return JSON array: title, organization, date, link.",
+      contents: query + " Return the data ONLY as a JSON array of objects: title, organization, date, link.",
       config: {
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.ARRAY,
-          items: {
-            type: Type.OBJECT,
-            properties: {
-              title: { type: Type.STRING },
-              organization: { type: Type.STRING },
-              date: { type: Type.STRING },
-              link: { type: Type.STRING }
-            }
-          }
-        },
         tools: [{ googleSearch: {} }]
       }
     });
 
-    return JSON.parse(response.text || "[]");
+    return extractJson(response.text);
   } catch (err) {
     return [];
   }
 };
 
 /**
- * NEWS: Real-Time Academic Feed
+ * NEWS: Real-Time Academic Feed (Live Web)
  */
 export const fetchEducationalNews = async (): Promise<NewsItem[]> => {
   const ai = getAI();
   try {
     const response = await ai.models.generateContent({
       model: FLASH_MODEL,
-      contents: `Search for top educational headlines and scholarship alerts in India today. Return a JSON array.`,
+      contents: `Search for today's top educational news, scholarship alerts, and exam policy changes in India. 
+      Return ONLY a JSON array of objects: title, source, date, link, snippet.`,
       config: {
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.ARRAY,
-          items: {
-            type: Type.OBJECT,
-            properties: {
-              title: { type: Type.STRING },
-              source: { type: Type.STRING },
-              date: { type: Type.STRING },
-              link: { type: Type.STRING },
-              snippet: { type: Type.STRING }
-            }
-          }
-        },
         tools: [{ googleSearch: {} }]
       }
     });
-    return JSON.parse(response.text || "[]");
+    return extractJson(response.text);
   } catch (err) {
     return [];
   }
@@ -194,7 +177,7 @@ export const fetchSyllabusSubjects = async (course: string, branch: string, year
   try {
     const response = await ai.models.generateContent({
       model: FLASH_MODEL,
-      contents: `Provide a standard list of 8 subjects for ${course} (${branch}) - Year ${year}. Return JSON [{name, description}].`,
+      contents: `Provide a standard list of 8 subjects for ${course} (${branch}) - Year ${year}. Return as JSON array: [{name, description}].`,
       config: { 
         responseMimeType: "application/json",
         responseSchema: {
@@ -209,6 +192,6 @@ export const fetchSyllabusSubjects = async (course: string, branch: string, year
         }
       }
     });
-    return JSON.parse(response.text || "[]");
+    return extractJson(response.text);
   } catch (err) { return []; }
 };
