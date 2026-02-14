@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Section } from './types';
 import Navbar from './components/Navbar';
@@ -17,12 +16,48 @@ import {
   Trophy, Rocket, Heart
 } from 'lucide-react';
 
+// Add debug component
+const DebugInfo = () => {
+  const [envInfo, setEnvInfo] = useState<any>({});
+  
+  useEffect(() => {
+    // Check what environment variables are available
+    setEnvInfo({
+      hasApiKey: !!process.env.API_KEY,
+      hasGeminiKey: !!process.env.GEMINI_API_KEY,
+      hasViteKey: !!process.env.VITE_API_KEY,
+      nodeEnv: process.env.NODE_ENV,
+      // Don't show actual keys, just first 4 chars if exists
+      apiKeyPreview: process.env.API_KEY ? process.env.API_KEY.substring(0, 4) + '...' : 'not set',
+    });
+  }, []);
+  
+  return (
+    <div className="fixed bottom-20 left-4 bg-black text-white p-4 rounded-xl z-[1000] text-xs">
+      <h4 className="font-bold mb-2">🔧 Debug Info</h4>
+      <pre>{JSON.stringify(envInfo, null, 2)}</pre>
+    </div>
+  );
+};
+
 const App: React.FC = () => {
   const [currentSection, setSection] = useState<Section>(Section.HOME);
+  const [showDebug, setShowDebug] = useState(false);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [currentSection]);
+
+  // Add keyboard shortcut to show debug (Ctrl+Shift+D)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.shiftKey && e.key === 'D') {
+        setShowDebug(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const renderStaticPage = (title: string, icon: any, content: React.ReactNode) => (
     <div className="max-w-5xl mx-auto py-16 sm:py-32 px-4 sm:px-6 animate-in fade-in slide-in-from-bottom-8 duration-1000">
@@ -328,6 +363,7 @@ const App: React.FC = () => {
     <div className="min-h-screen bg-white flex flex-col font-sans overflow-x-hidden selection:bg-indigo-600 selection:text-white">
       <Navbar currentSection={currentSection} setSection={setSection} />
       <QuickContact />
+      {showDebug && <DebugInfo />}
       <main className="flex-grow pt-10">{renderSection()}</main>
       
       <footer className="bg-slate-950 py-16 sm:py-32 px-4 sm:px-6 text-white border-t border-white/5">
