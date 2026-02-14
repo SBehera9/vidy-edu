@@ -1,4 +1,3 @@
-
 import { JobNotification, NewsItem, SearchResult, AdmitCardResult, SyllabusSubject } from "../types";
 import { GoogleGenAI, Type } from "@google/genai";
 
@@ -9,10 +8,20 @@ const FLASH_MODEL = 'gemini-3-flash-preview';
  * Vercel's latest environment variables are picked up correctly.
  */
 const getAI = () => {
-  const key = process.env.API_KEY;
+  const key = process.env.API_KEY || process.env.GEMINI_API_KEY || process.env.VITE_API_KEY;
+  
   if (!key) {
     console.error("Vidy Diagnostic: API_KEY environment variable is missing!");
+    console.error("Available env vars:", Object.keys(process.env).filter(key => 
+      !key.includes('SECRET') && !key.includes('PASSWORD')
+    ));
+    
+    // For debugging in Vercel - this will show in build logs
+    if (typeof window === 'undefined') {
+      console.error("Server-side environment check failed - no API key found");
+    }
   }
+  
   return new GoogleGenAI({ apiKey: key || '' });
 };
 
@@ -143,6 +152,7 @@ export const fetchExamUpdates = async (type: 'admit-card' | 'result'): Promise<A
     const data = extractDataArray(response);
     return Array.isArray(data) ? data : [];
   } catch (err) {
+    console.error("Exam Updates Failed:", err);
     return [];
   }
 };
@@ -164,6 +174,7 @@ export const fetchEducationalNews = async (): Promise<NewsItem[]> => {
     const data = extractDataArray(response);
     return Array.isArray(data) ? data : [];
   } catch (err) {
+    console.error("News Sync Failed:", err);
     return [];
   }
 };
@@ -192,5 +203,8 @@ export const fetchSyllabusSubjects = async (course: string, branch: string, year
       }
     });
     return extractDataArray(response);
-  } catch (err) { return []; }
+  } catch (err) { 
+    console.error("Syllabus Subjects Failed:", err);
+    return []; 
+  }
 };
