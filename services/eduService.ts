@@ -1,69 +1,84 @@
-
-import { JobNotification, NewsItem, SearchResult, AdmitCardResult, SyllabusSubject } from "../types";
+/// <reference types="vite/client" />
+import {
+  JobNotification,
+  NewsItem,
+  SearchResult,
+  AdmitCardResult
+} from "../types";
 import { GoogleGenAI, Type } from "@google/genai";
 
-const FLASH_MODEL = 'gemini-3-flash-preview';
+const FLASH_MODEL = "gemini-3-flash-preview";
 
 /**
- * Robust AI Initializer
- * Specifically designed to detect if Vercel has injected the API_KEY correctly.
+ * ✅ VITE + VERCEL SAFE AI INITIALIZER
  */
 const getAI = () => {
-  // Access the key. 
-  const apiKey = process.env.API_KEY;
-  
-  if (!apiKey || apiKey === "undefined" || apiKey.length < 5) {
-    console.error("CRITICAL: API_KEY is missing or invalid in the current environment.");
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+
+  if (!apiKey || apiKey === "undefined" || apiKey.length < 10) {
+    console.error("❌ Gemini API key missing or invalid");
     return null;
   }
-  
+
   try {
     return new GoogleGenAI({ apiKey });
-  } catch (e) {
-    console.error("Failed to initialize GoogleGenAI:", e);
+  } catch (err) {
+    console.error("❌ Gemini init failed:", err);
     return null;
   }
 };
 
 /**
- * RESEARCH LAB: Omni-Search
+ * 🔍 ACADEMIC SEARCH
  */
 export const academicSearch = async (query: string): Promise<SearchResult> => {
   const ai = getAI();
-  if (!ai) return { text: "### Connection Error\nYour API_KEY is not configured in Vercel. Please add it to Environment Variables and redeploy.", sources: [] };
+  if (!ai) {
+    return {
+      text: "### Configuration Error\nAI service not configured.",
+      sources: []
+    };
+  }
 
   try {
     const response = await ai.models.generateContent({
       model: FLASH_MODEL,
-      contents: `Provide a detailed academic report for: "${query}". Focus on official Indian sources. Use Markdown.`,
+      contents: `Provide a detailed academic explanation for "${query}" using official Indian sources.`,
       config: { tools: [{ googleSearch: {} }] }
     });
 
-    const text = response.text || "No response from research server.";
-    const sources = response.candidates?.[0]?.groundingMetadata?.groundingChunks
-      ?.map((chunk: any) => ({
-        title: chunk.web?.title || 'Verified Source',
-        uri: chunk.web?.uri || '#'
-      }))
-      .filter((s: any) => s.uri !== '#') || [];
+    const text = response.text || "No result generated.";
+    const sources =
+      response.candidates?.[0]?.groundingMetadata?.groundingChunks
+        ?.map((chunk: any) => ({
+          title: chunk.web?.title || "Official Source",
+          uri: chunk.web?.uri || "#"
+        }))
+        .filter((s: any) => s.uri !== "#") || [];
 
     return { text, sources };
-  } catch (err: any) {
-    return { text: `### Error\n${err.message || 'The search service is currently unavailable.'}`, sources: [] };
+  } catch (err) {
+    console.error("Search error:", err);
+    return {
+      text: "### Error\nSearch service unavailable.",
+      sources: []
+    };
   }
 };
 
 /**
- * SYLLABUS: Registry Fetcher
+ * 📘 SYLLABUS FETCH
  */
-export const fetchSyllabusByCategory = async (category: string): Promise<AdmitCardResult[]> => {
+export const fetchSyllabusByCategory = async (
+  category: string
+): Promise<AdmitCardResult[]> => {
   const ai = getAI();
   if (!ai) return [];
 
   try {
     const response = await ai.models.generateContent({
       model: FLASH_MODEL,
-      contents: `List 8 official syllabus links for "${category}" in India.`,
+      contents: `Official syllabus links for "${category}" exams in India.`,
       config: {
         tools: [{ googleSearch: {} }],
         responseMimeType: "application/json",
@@ -82,25 +97,25 @@ export const fetchSyllabusByCategory = async (category: string): Promise<AdmitCa
         }
       }
     });
-    return JSON.parse(response.text || '[]');
+
+    return JSON.parse(response.text || "[]");
   } catch (err) {
-    console.error("Syllabus Error:", err);
+    console.error("Syllabus error:", err);
     return [];
   }
 };
 
 /**
- * JOB BOARD: Vacancy Sync
+ * 🧾 JOB NOTIFICATIONS
  */
 export const fetchJobNotifications = async (): Promise<JobNotification[]> => {
   const ai = getAI();
   if (!ai) return [];
 
-  const today = new Date().toLocaleDateString('en-IN');
   try {
     const response = await ai.models.generateContent({
       model: FLASH_MODEL,
-      contents: `Search for active official government job vacancies in India as of ${today}.`,
+      contents: "Active official government job vacancies in India.",
       config: {
         tools: [{ googleSearch: {} }],
         responseMimeType: "application/json",
@@ -123,23 +138,65 @@ export const fetchJobNotifications = async (): Promise<JobNotification[]> => {
         }
       }
     });
-    return JSON.parse(response.text || '[]');
+
+    return JSON.parse(response.text || "[]");
   } catch (err) {
-    console.error("Job Sync Error:", err);
+    console.error("Job fetch error:", err);
     return [];
   }
 };
 
 /**
- * EXAM UPDATES: Admit Cards & Results
+ * 📰 EDUCATION NEWS
  */
-export const fetchExamUpdates = async (type: 'admit-card' | 'result'): Promise<AdmitCardResult[]> => {
+export const fetchEducationalNews = async (): Promise<NewsItem[]> => {
   const ai = getAI();
   if (!ai) return [];
 
-  const query = type === 'admit-card' 
-    ? "Search for recently released official Admit Cards for Indian National Exams."
-    : "Search for official Exam Results declared recently in India.";
+  try {
+    const response = await ai.models.generateContent({
+      model: FLASH_MODEL,
+      contents: "Top educational news in India today.",
+      config: {
+        tools: [{ googleSearch: {} }],
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.ARRAY,
+          items: {
+            type: Type.OBJECT,
+            properties: {
+              title: { type: Type.STRING },
+              source: { type: Type.STRING },
+              date: { type: Type.STRING },
+              link: { type: Type.STRING },
+              snippet: { type: Type.STRING }
+            },
+            required: ["title", "link"]
+          }
+        }
+      }
+    });
+
+    return JSON.parse(response.text || "[]");
+  } catch (err) {
+    console.error("News error:", err);
+    return [];
+  }
+};
+
+/**
+ * 🎓 EXAM UPDATES (FIXES YOUR CRASH)
+ */
+export const fetchExamUpdates = async (
+  type: "admit-card" | "result"
+): Promise<AdmitCardResult[]> => {
+  const ai = getAI();
+  if (!ai) return [];
+
+  const query =
+    type === "admit-card"
+      ? "Recently released admit cards for Indian exams."
+      : "Recently declared exam results in India.";
 
   try {
     const response = await ai.models.generateContent({
@@ -163,44 +220,10 @@ export const fetchExamUpdates = async (type: 'admit-card' | 'result'): Promise<A
         }
       }
     });
-    return JSON.parse(response.text || '[]');
-  } catch (err) {
-    return [];
-  }
-};
 
-/**
- * NEWS: Academic Feed
- */
-export const fetchEducationalNews = async (): Promise<NewsItem[]> => {
-  const ai = getAI();
-  if (!ai) return [];
-
-  try {
-    const response = await ai.models.generateContent({
-      model: FLASH_MODEL,
-      contents: "Top 5 educational news headlines in India for today.",
-      config: {
-        tools: [{ googleSearch: {} }],
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.ARRAY,
-          items: {
-            type: Type.OBJECT,
-            properties: {
-              title: { type: Type.STRING },
-              source: { type: Type.STRING },
-              date: { type: Type.STRING },
-              link: { type: Type.STRING },
-              snippet: { type: Type.STRING }
-            },
-            required: ["title", "link"]
-          }
-        }
-      }
-    });
-    return JSON.parse(response.text || '[]');
+    return JSON.parse(response.text || "[]");
   } catch (err) {
+    console.error("Exam update error:", err);
     return [];
   }
 };
