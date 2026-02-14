@@ -1,5 +1,5 @@
 
-import React, { ErrorInfo, ReactNode } from 'react';
+import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { RefreshCcw, Home, ShieldAlert } from 'lucide-react';
 
 interface Props {
@@ -16,14 +16,12 @@ interface State {
 /**
  * World-class Error Boundary with empathetic UI and multi-path recovery.
  */
-// Fix: Use React.Component to ensure that the class correctly inherits properties like 'props' and 'state' from the React base class.
-class ErrorBoundary extends React.Component<Props, State> {
-  // Fix: Removed 'override' keyword as it was causing issues when inheritance resolution failed in this environment.
+class ErrorBoundary extends Component<Props, State> {
   public state: State = {
     hasError: false
   };
 
-  // Explicit constructor to ensure props are correctly initialized in the base class.
+  // Explicit constructor ensuring props are passed to the base Component class.
   constructor(props: Props) {
     super(props);
   }
@@ -32,9 +30,9 @@ class ErrorBoundary extends React.Component<Props, State> {
     return { hasError: true, error };
   }
 
-  // Fix: Removed 'override' keyword. This lifecycle method catches errors in the component tree.
+  // Lifecycle method to catch errors in the component tree.
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    // Accessing this.props is now valid as the class correctly inherits from React.Component.
+    // Accessing this.props now correctly inherited from Component.
     console.error(`[ErrorBoundary] Caught error in ${this.props.sectionName || 'Component'}:`, error, errorInfo);
   }
 
@@ -42,9 +40,8 @@ class ErrorBoundary extends React.Component<Props, State> {
     window.location.reload();
   };
 
-  // Fix: Removed 'override' keyword. The render method is required for React class components.
   public render() {
-    // Accessing this.state and this.props is valid within class component methods.
+    // Accessing this.state inherited from the base class.
     if (this.state.hasError) {
       return (
         <div className="min-h-[60vh] flex items-center justify-center p-6 animate-in fade-in zoom-in-95 duration-500">
@@ -63,6 +60,7 @@ class ErrorBoundary extends React.Component<Props, State> {
               </h2>
               
               <p className="text-slate-500 text-lg font-medium mb-10 leading-relaxed max-w-md mx-auto">
+                {/* Accessing this.props.sectionName from inherited props. */}
                 The <span className="font-bold text-slate-800">{this.props.sectionName || 'requested module'}</span> encountered a technical sync issue. Our engineers have been notified.
               </p>
 
@@ -93,6 +91,7 @@ class ErrorBoundary extends React.Component<Props, State> {
       );
     }
 
+    // Accessing this.props.children from inherited props.
     return this.props.children;
   }
 }

@@ -2,7 +2,11 @@
 import React, { useState } from 'react';
 import { fetchSyllabusByCategory } from '../services/eduService';
 import { AdmitCardResult } from '../types';
-import { Book, GraduationCap, School, ChevronRight, Loader2, Layers, Award, BookOpen, ArrowLeft, RefreshCw, Cpu, Zap, Download, FileText, Search } from 'lucide-react';
+import { Book, GraduationCap, School, ChevronRight, Loader2, Layers, Award, BookOpen, ArrowLeft, RefreshCw, Cpu, Zap, Download, FileText, Search, CloudOff } from 'lucide-react';
+
+interface SyllabusSectionProps {
+  onOpenLab: () => void;
+}
 
 const CATEGORIES = [
   { id: 'school', icon: School, label: "Schooling", color: 'bg-amber-50 text-amber-600', sub: 'CBSE, ICSE, Boards' },
@@ -21,26 +25,33 @@ const SyncingOverlay = ({ message }: { message: string }) => (
       </div>
     </div>
     <h3 className="text-xl sm:text-2xl font-black text-slate-900 mb-2 sm:mb-4">Syncing Registry</h3>
-    <p className="text-slate-400 font-bold uppercase tracking-[0.2em] sm:tracking-[0.3em] text-[8px] sm:text-[10px] flex items-center gap-1.5 sm:gap-2">
+    <p className="text-slate-400 font-bold uppercase tracking-[0.2em] text-[8px] sm:text-[10px] flex items-center gap-1.5 sm:gap-2">
       <Zap className="w-2.5 h-2.5 sm:w-3 sm:h-3 fill-indigo-500 text-indigo-500" /> {message}
     </p>
   </div>
 );
 
-const SyllabusSection: React.FC = () => {
+const SyllabusSection: React.FC<SyllabusSectionProps> = ({ onOpenLab }) => {
   const [view, setView] = useState<'home' | 'listing'>('home');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
   const [data, setData] = useState<AdmitCardResult[]>([]);
   const [selectedCat, setSelectedCat] = useState<any>(null);
 
   const openListing = async (cat: any) => {
     setSelectedCat(cat);
     setLoading(true);
+    setError(false);
     setView('listing');
     try {
       const res = await fetchSyllabusByCategory(cat.label + " " + cat.sub);
-      setData(res || []);
+      if (!res || res.length === 0) {
+        setData([]);
+      } else {
+        setData(res);
+      }
     } catch (e) { 
+      setError(true);
       setData([]); 
     } finally { 
       setLoading(false); 
@@ -88,7 +99,7 @@ const SyllabusSection: React.FC = () => {
               <p className="text-slate-400 text-[8px] sm:text-[11px] font-black uppercase tracking-[0.1em] sm:tracking-[0.2em] mb-6 sm:mb-10 leading-tight sm:leading-relaxed">{cat.sub}</p>
               
               <div className="mt-auto px-4 sm:px-8 py-2 sm:py-4 bg-slate-50 rounded-xl sm:rounded-2xl text-[7px] sm:text-[10px] font-black uppercase tracking-widest text-slate-400 group-hover:bg-indigo-600 group-hover:text-white transition-all flex items-center gap-1 sm:gap-2">
-                Explore <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4" />
+                Explore <ChevronRight className="w-3 h-3 sm:w-4 h-4" />
               </div>
             </button>
           ))}
@@ -99,18 +110,25 @@ const SyllabusSection: React.FC = () => {
         <div className="animate-in fade-in slide-in-from-right-8 duration-700">
           <button 
             onClick={() => setView('home')} 
-            className="flex items-center gap-2 sm:gap-3 text-[9px] sm:text-[11px] font-black uppercase text-slate-400 tracking-[0.2em] sm:tracking-[0.3em] mb-8 sm:mb-16 hover:text-slate-900 transition-colors group"
+            className="flex items-center gap-2 sm:gap-3 text-[9px] sm:text-[11px] font-black uppercase text-slate-400 tracking-[0.3em] mb-8 sm:mb-16 hover:text-slate-900 transition-colors group"
           >
-            <ArrowLeft className="w-3 h-3 sm:w-4 sm:h-4 group-hover:-translate-x-1 transition-transform" /> Categories
+            <ArrowLeft className="w-3 h-3 sm:w-4 h-4 group-hover:-translate-x-1 transition-transform" /> Categories
           </button>
 
           {loading ? (
             <SyncingOverlay message={`Scanning ${selectedCat?.label} Databases...`} />
+          ) : error ? (
+            <div className="py-20 sm:py-40 text-center bg-rose-50 rounded-[2rem] sm:rounded-[4rem] border border-rose-100">
+              <CloudOff className="w-12 h-12 sm:w-20 sm:h-20 text-rose-300 mx-auto mb-6 sm:mb-8" />
+              <h3 className="text-2xl sm:text-3xl font-black text-rose-900 mb-2 sm:mb-4">Connection Failed</h3>
+              <p className="text-rose-600 text-xs sm:text-base font-medium max-w-xs sm:max-w-sm mx-auto mb-8">We couldn't reach the curriculum server. Check your API Key.</p>
+              <button onClick={refreshListing} className="px-8 sm:px-12 py-4 bg-rose-600 text-white rounded-xl font-bold uppercase text-[9px] tracking-widest">Retry Connection</button>
+            </div>
           ) : data.length === 0 ? (
             <div className="py-20 sm:py-40 text-center bg-slate-50 rounded-[2rem] sm:rounded-[4rem] border border-slate-100">
               <Search className="w-12 h-12 sm:w-20 sm:h-20 text-slate-200 mx-auto mb-6 sm:mb-8" />
               <h3 className="text-2xl sm:text-3xl font-black text-slate-900 mb-2 sm:mb-4">No Data Found</h3>
-              <p className="text-slate-500 text-xs sm:text-base font-medium max-w-xs sm:max-w-sm mx-auto mb-8 sm:mb-12">Our AI couldn't find official links. Retrying sync might help.</p>
+              <p className="text-slate-500 text-xs sm:text-base font-medium max-w-xs sm:max-w-sm mx-auto mb-8 sm:mb-12">No official documents were found in the national registry for this category.</p>
               <button onClick={refreshListing} className="px-8 sm:px-12 py-4 sm:py-5 bg-slate-900 text-white rounded-xl sm:rounded-2xl font-black uppercase text-[9px] sm:text-[10px] tracking-widest">Retry Sync</button>
             </div>
           ) : (
@@ -120,7 +138,7 @@ const SyllabusSection: React.FC = () => {
                   <div className="text-left overflow-hidden pr-4 sm:pr-10">
                     <div className="flex items-center gap-2 mb-2 sm:mb-4">
                       <span className="px-2 sm:px-4 py-1 sm:py-1.5 bg-amber-50 text-amber-600 rounded-full text-[7px] sm:text-[9px] font-black uppercase tracking-widest border border-amber-100">Official</span>
-                      <span className="text-[7px] sm:text-[10px] font-bold text-slate-300 uppercase tracking-widest truncate max-w-[80px] sm:max-w-none">{item.organization}</span>
+                      <span className="text-[7px] sm:text-[10px] font-bold text-slate-300 uppercase tracking-widest truncate">{item.organization}</span>
                     </div>
                     <h4 className="text-sm sm:text-3xl font-extrabold text-slate-900 mb-2 sm:mb-4 tracking-tight leading-tight group-hover:text-indigo-600 transition-colors truncate">{item.title}</h4>
                     <div className="flex items-center gap-3 sm:gap-6 text-[7px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest">
@@ -146,10 +164,15 @@ const SyllabusSection: React.FC = () => {
       <div className="mt-20 sm:mt-40 pt-16 sm:pt-32 border-t border-slate-50">
          <div className="bg-slate-900 rounded-[2rem] sm:rounded-[4rem] p-8 sm:p-20 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-48 sm:w-96 h-48 sm:h-96 bg-indigo-500/10 rounded-full blur-[60px] sm:blur-[100px]"></div>
-            <div className="relative z-10 max-w-2xl">
+            <div className="relative z-10 max-w-2xl text-left">
                <h4 className="text-2xl sm:text-5xl font-black text-white mb-4 sm:mb-8 tracking-tight">Custom Research</h4>
-               <p className="text-slate-400 text-sm sm:text-xl font-medium mb-8 sm:mb-12">Search any school or university curriculum in real-time using AI.</p>
-               <button onClick={() => window.scrollTo({top: 0})} className="px-8 sm:px-12 py-4 sm:py-6 bg-white text-slate-900 rounded-xl sm:rounded-[2rem] font-black uppercase text-[9px] sm:text-[11px] tracking-[0.2em] sm:tracking-[0.3em] hover:bg-indigo-600 hover:text-white transition-all shadow-2xl">Open Lab</button>
+               <p className="text-slate-400 text-sm sm:text-xl font-medium mb-8 sm:mb-12">Search any school or university curriculum in real-time using AI Intelligence.</p>
+               <button 
+                onClick={onOpenLab} 
+                className="px-8 sm:px-12 py-4 sm:py-6 bg-white text-slate-900 rounded-xl sm:rounded-[2rem] font-black uppercase text-[9px] sm:text-[11px] tracking-[0.3em] hover:bg-indigo-600 hover:text-white transition-all shadow-2xl"
+               >
+                 Open Research Lab
+               </button>
             </div>
          </div>
       </div>

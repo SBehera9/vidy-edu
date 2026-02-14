@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { fetchJobNotifications, fetchExamUpdates } from '../services/eduService';
 import { JobNotification, AdmitCardResult } from '../types';
-import { Calendar, Building2, ExternalLink, Zap, MapPin, Briefcase, ChevronDown, RefreshCw, Loader2, ArrowRight, ShieldCheck, Search, AlertCircle } from 'lucide-react';
+import { Calendar, Building2, ExternalLink, Zap, MapPin, Briefcase, ChevronDown, RefreshCw, Loader2, ArrowRight, ShieldCheck, Search, AlertCircle, CloudOff } from 'lucide-react';
 
 const ITEMS_PER_PAGE = 6;
 
@@ -39,17 +39,14 @@ const JobSection: React.FC = () => {
         ? await fetchJobNotifications() 
         : await fetchExamUpdates(activeTab === 'admit-cards' ? 'admit-card' : 'result');
       
-      if (!results || results.length === 0) {
-        setDataList([]);
-      } else {
-        setDataList(results);
-      }
+      setDataList(results || []);
     } catch (e: any) { 
       console.error("Load Error:", e);
-      setError(e.message || "Failed to sync with national database.");
+      setError(e.message || "Connection refused by host database.");
       setDataList([]); 
+    } finally { 
+      setLoading(false); 
     }
-    finally { setLoading(false); }
   };
 
   useEffect(() => { loadData(); }, [activeTab]);
@@ -68,9 +65,9 @@ const JobSection: React.FC = () => {
         <button 
           onClick={loadData} 
           disabled={loading} 
-          className="group w-full sm:w-auto px-8 sm:px-10 py-4 sm:py-6 bg-slate-900 text-white rounded-[1.5rem] sm:rounded-[2rem] font-black uppercase text-[9px] sm:text-[11px] tracking-widest hover:bg-indigo-600 transition-all flex items-center justify-center gap-3 sm:gap-4 shadow-2xl active:scale-95 disabled:opacity-50 btn-shine"
+          className="group w-full sm:w-auto px-8 sm:px-10 py-4 sm:py-6 bg-slate-900 text-white rounded-[1.5rem] sm:rounded-[2rem] font-black uppercase text-[9px] sm:text-[11px] tracking-widest hover:bg-indigo-600 transition-all flex items-center justify-center gap-3 sm:gap-4 shadow-2xl active:scale-95 disabled:opacity-50"
         >
-          <RefreshCw className={`w-4 h-4 sm:w-5 sm:h-5 ${loading ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-700'}`} /> {loading ? 'Processing...' : 'Sync Latest Feed'}
+          <RefreshCw className={`w-4 h-4 sm:w-5 sm:h-5 ${loading ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-700'}`} /> {loading ? 'Syncing...' : 'Sync Latest Feed'}
         </button>
       </div>
 
@@ -89,24 +86,33 @@ const JobSection: React.FC = () => {
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-10">
         {loading ? (
           <SyncingOverlay message={`Scanning National Boards for ${activeTab}...`} />
-        ) : (dataList.length === 0 || error) ? (
-            <div className="col-span-full py-20 sm:py-32 text-center bg-slate-50 rounded-[2.5rem] sm:rounded-[4rem] border border-slate-100">
-               {error ? <AlertCircle className="w-12 h-12 sm:w-20 sm:h-20 text-rose-300 mx-auto mb-4 sm:mb-8" /> : <ShieldCheck className="w-12 h-12 sm:w-20 sm:h-20 text-slate-200 mx-auto mb-4 sm:mb-8" />}
-               <h3 className="text-xl sm:text-2xl font-extrabold text-slate-900 mb-2 sm:mb-4">{error ? 'Sync Connection Failed' : 'Scanning Official Records...'}</h3>
-               <p className="text-slate-500 text-[10px] sm:text-base font-medium max-w-xs sm:max-w-sm mx-auto">
-                 {error ? "Please ensure your API_KEY is correctly set in Vercel settings and redeploy your project." : "No new notifications found in this category right now. Try refreshing in a few minutes."}
+        ) : error ? (
+            <div className="col-span-full py-20 sm:py-32 text-center bg-rose-50 rounded-[2.5rem] sm:rounded-[4rem] border border-rose-100">
+               <CloudOff className="w-12 h-12 sm:w-20 sm:h-20 text-rose-300 mx-auto mb-4 sm:mb-8" />
+               <h3 className="text-xl sm:text-2xl font-extrabold text-rose-900 mb-2 sm:mb-4 tracking-tight">Sync Failure</h3>
+               <p className="text-rose-600 text-[10px] sm:text-base font-medium max-w-xs sm:max-w-md mx-auto mb-8">
+                 We couldn't reach the AI sync server. Please ensure the API_KEY is correctly set in Vercel and redeploy.
                </p>
-               <button onClick={loadData} className="mt-6 sm:mt-8 px-8 sm:px-10 py-3 sm:py-4 bg-slate-900 text-white rounded-xl sm:rounded-2xl font-black uppercase text-[8px] sm:text-[10px] tracking-widest hover:bg-indigo-600 transition-all">Retry Sync</button>
+               <button onClick={loadData} className="px-8 sm:px-12 py-3 sm:py-5 bg-rose-600 text-white rounded-xl sm:rounded-2xl font-black uppercase text-[8px] sm:text-[10px] tracking-widest hover:bg-rose-700 transition-all shadow-lg">Try Again</button>
+            </div>
+          ) : dataList.length === 0 ? (
+            <div className="col-span-full py-20 sm:py-32 text-center bg-slate-50 rounded-[2.5rem] sm:rounded-[4rem] border border-slate-100">
+               <Search className="w-12 h-12 sm:w-20 sm:h-20 text-slate-200 mx-auto mb-4 sm:mb-8" />
+               <h3 className="text-xl sm:text-2xl font-extrabold text-slate-900 mb-2 sm:mb-4">No Notifications Found</h3>
+               <p className="text-slate-500 text-[10px] sm:text-base font-medium max-w-xs sm:max-w-sm mx-auto mb-6">
+                 All records are currently up to date. Check back in a few hours.
+               </p>
+               <button onClick={loadData} className="px-6 py-3 bg-slate-900 text-white rounded-xl font-bold uppercase text-[8px] tracking-widest">Refresh Feed</button>
             </div>
           ) : (
             dataList.slice(0, visibleCount).map((item, idx) => (
-              <div key={idx} className="bento-card p-4 sm:p-12 rounded-[2rem] sm:rounded-[4.5rem] flex flex-col h-full min-h-[350px] sm:min-h-[520px] group animate-in slide-in-from-bottom-10 duration-700" style={{ transitionDelay: `${idx % 6 * 100}ms` }}>
+              <div key={idx} className="bento-card p-4 sm:p-12 rounded-[2rem] sm:rounded-[4.5rem] flex flex-col h-full min-h-[350px] sm:min-h-[520px] group animate-in slide-in-from-bottom-10 duration-700">
                 <div className="flex flex-col sm:flex-row justify-between items-start gap-2 mb-4 sm:mb-10">
                   <div className="px-2 sm:px-5 py-1 sm:py-2 bg-indigo-50 text-indigo-600 rounded-full text-[7px] sm:text-[10px] font-black uppercase tracking-widest border border-indigo-100">
                     {item.state || 'National'}
                   </div>
                   <div className="flex items-center gap-1 sm:gap-2 text-[7px] sm:text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">
-                    <MapPin className="w-3 h-3 sm:w-4 sm:h-4 text-slate-300" /> <span className="truncate max-w-[50px] sm:max-w-none">{item.location || 'India'}</span>
+                    <MapPin className="w-3 h-3 sm:w-4 sm:h-4 text-slate-300" /> <span className="truncate">{item.location || 'India'}</span>
                   </div>
                 </div>
                 
@@ -114,24 +120,24 @@ const JobSection: React.FC = () => {
                   <div className="flex items-center gap-1.5 sm:gap-3 mb-2 sm:mb-4 text-[7px] sm:text-[11px] font-bold uppercase text-slate-400 tracking-widest">
                     <Building2 className="w-3 h-3 sm:w-4 sm:h-4 text-slate-300 shrink-0" /> <span className="truncate">{item.organization}</span>
                   </div>
-                  <h3 className="text-xs sm:text-2xl lg:text-3xl font-extrabold text-slate-900 leading-[1.2] sm:leading-[1.1] mb-2 sm:mb-6 group-hover:text-indigo-600 transition-colors line-clamp-3 tracking-tight">
+                  <h3 className="text-xs sm:text-2xl lg:text-3xl font-extrabold text-slate-900 leading-[1.2] mb-2 sm:mb-6 group-hover:text-indigo-600 transition-colors line-clamp-3 tracking-tight">
                     {item.title}
                   </h3>
                   <p className="hidden sm:block text-slate-500 text-base font-medium leading-relaxed line-clamp-4 mb-8">
-                    {item.description || 'Verified notification from official recruitment board. Read eligibility, vacancy details, and selection process.'}
+                    {item.description || 'Verified notification from official recruitment board.'}
                   </p>
                 </div>
 
                 <div className="mt-4 sm:mt-8 pt-4 sm:pt-10 border-t border-slate-50 flex flex-col gap-4 sm:gap-8">
                   <div className="flex justify-between items-center text-[7px] sm:text-[11px] font-black text-slate-400 uppercase tracking-widest">
-                    <span className="flex items-center gap-1.5 sm:gap-3"><Calendar className="w-3 h-3 sm:w-5 sm:h-5 text-indigo-500" /> <span className="truncate max-w-[40px] sm:max-w-none">{item.startDate || item.date || 'LATEST'}</span></span>
-                    <span className="text-emerald-500 flex items-center gap-1 sm:gap-2 font-black uppercase"><div className="w-1 sm:w-1.5 h-1 sm:h-1.5 rounded-full bg-emerald-500 animate-pulse"></div> Official</span>
+                    <span className="flex items-center gap-1.5 sm:gap-3"><Calendar className="w-3 h-3 sm:w-5 sm:h-5 text-indigo-500" /> {item.startDate || item.date || 'LATEST'}</span>
+                    <span className="text-emerald-500 font-black uppercase">Official</span>
                   </div>
                   <a 
                     href={item.link || item.applyLink} 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="w-full py-3 sm:py-6 bg-slate-900 text-white rounded-[1rem] sm:rounded-[2rem] font-black uppercase text-[7px] sm:text-[11px] tracking-[0.2em] sm:tracking-[0.3em] flex items-center justify-center gap-2 sm:gap-4 hover:bg-indigo-600 transition-all shadow-xl active:scale-95 btn-shine"
+                    className="w-full py-3 sm:py-6 bg-slate-900 text-white rounded-[1rem] sm:rounded-[2rem] font-black uppercase text-[7px] sm:text-[11px] tracking-[0.2em] sm:tracking-[0.3em] flex items-center justify-center gap-2 sm:gap-4 hover:bg-indigo-600 transition-all shadow-xl"
                   >
                     Open Portal <ExternalLink className="w-3 h-3 sm:w-4 sm:h-4" />
                   </a>
@@ -141,13 +147,13 @@ const JobSection: React.FC = () => {
           )}
       </div>
       
-      {!loading && dataList.length > visibleCount && (
+      {!loading && !error && dataList.length > visibleCount && (
         <div className="mt-12 sm:mt-24 text-center">
           <button 
             onClick={() => setVisibleCount(v => v + 6)} 
-            className="px-10 sm:px-16 py-4 sm:py-7 bg-white border-2 border-slate-900 text-slate-900 rounded-[1.5rem] sm:rounded-[2.5rem] font-black uppercase text-[9px] sm:text-[11px] tracking-[0.3em] sm:tracking-[0.4em] hover:bg-slate-900 hover:text-white transition-all shadow-xl active:scale-95"
+            className="px-10 sm:px-16 py-4 sm:py-7 bg-white border-2 border-slate-900 text-slate-900 rounded-[1.5rem] sm:rounded-[2.5rem] font-black uppercase text-[9px] sm:text-[11px] tracking-[0.4em] hover:bg-slate-900 hover:text-white transition-all shadow-xl"
           >
-            Load More <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 inline ml-2 sm:ml-3 animate-bounce" />
+            Load More <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 inline ml-2 animate-bounce" />
           </button>
         </div>
       )}
