@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Section } from '../types';
 import { GraduationCap, Briefcase, Search, Home, Newspaper, Menu, X, ArrowRight, Zap, ChevronRight } from 'lucide-react';
@@ -73,7 +72,6 @@ const Navbar: React.FC<NavbarProps> = ({ currentSection, setSection }) => {
         </nav>
       </div>
 
-      {/* Modern Mobile Overlay */}
       <div className={`fixed inset-0 z-[110] lg:hidden transition-all duration-700 ${isOpen ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'}`}>
         <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-xl" onClick={() => setIsOpen(false)} />
         <div className={`absolute top-0 right-0 h-full w-[85%] max-w-[420px] bg-white shadow-2xl transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { MessageCircle, X, Zap, ShieldCheck, Heart } from 'lucide-react';
 
@@ -12,9 +11,8 @@ const QuickContact: React.FC = () => {
   }, []);
 
   const handleWhatsApp = () => {
-    // Replace with actual support number
     const message = encodeURIComponent("Hello Vidy Team, I'm a student seeking guidance on academic resources.");
-    window.open(`https://wa.me/919999999999?text=${message}`, '_blank');
+    window.open(`https://wa.me/919876543210?text=${message}`, '_blank');
   };
 
   return (

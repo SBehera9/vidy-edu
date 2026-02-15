@@ -1,4 +1,3 @@
-
 export interface JobNotification {
   title: string;
   organization: string;

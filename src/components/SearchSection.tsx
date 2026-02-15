@@ -1,6 +1,5 @@
-
 import React, { useState } from 'react';
-import { Loader2, Sparkles, Link as LinkIcon, ExternalLink, Search, Trash2, Globe, AlertCircle } from 'lucide-react';
+import { Loader2, Sparkles, Link as LinkIcon, ExternalLink, Search, Globe, AlertCircle } from 'lucide-react';
 import { academicSearch } from '../services/eduService';
 import { SearchResult } from '../types';
 import ReactMarkdown from 'react-markdown';
@@ -21,7 +20,6 @@ const SearchSection: React.FC = () => {
     try {
       const data = await academicSearch(query);
       setResult(data);
-      if (!data.text || data.text.includes("Maintenance")) setError(true);
     } catch (error) {
       setError(true);
     } finally { setLoading(false); }
@@ -34,7 +32,7 @@ const SearchSection: React.FC = () => {
           <Globe className="w-3.5 h-3.5" /> Intelligence Lab
         </div>
         <h2 className="text-4xl sm:text-6xl md:text-8xl font-black text-slate-900 tracking-tighter leading-none mb-6">Research <span className="text-emerald-500">Lab</span></h2>
-        <p className="text-slate-500 text-base sm:text-xl font-medium">Ask anything—from exam patterns to career roadmaps. Accessing real-time internet data for verified answers.</p>
+        <p className="text-slate-500 text-base sm:text-xl font-medium">Ask anything—from exam patterns to career roadmaps. Accessing free knowledge bases for verified answers.</p>
       </div>
 
       <form onSubmit={handleSearch} className="relative mb-16 sm:mb-24">
@@ -59,8 +57,8 @@ const SearchSection: React.FC = () => {
         <div className="mb-12 p-6 sm:p-10 bg-rose-50 border border-rose-100 rounded-[2rem] flex flex-col sm:flex-row items-center gap-6 text-center sm:text-left">
            <AlertCircle className="w-10 h-10 sm:w-12 sm:h-12 text-rose-500" />
            <div>
-              <h4 className="text-lg sm:text-xl font-black text-rose-900 mb-1">Sync Issue Detected</h4>
-              <p className="text-rose-600/70 text-xs sm:text-sm font-medium">Please verify that your API_KEY is set correctly in Vercel settings and that you have redeployed the site.</p>
+              <h4 className="text-lg sm:text-xl font-black text-rose-900 mb-1">Search Error</h4>
+              <p className="text-rose-600/70 text-xs sm:text-sm font-medium">Unable to fetch results. Please try again.</p>
            </div>
         </div>
       )}
@@ -84,7 +82,7 @@ const SearchSection: React.FC = () => {
                    </div>
                    <ExternalLink className="w-3 h-3 text-slate-300 group-hover:text-slate-900" />
                 </a>
-              )) : <p className="text-[10px] text-slate-400 px-4 font-bold italic uppercase tracking-widest">Global Data Verified</p>}
+              )) : <p className="text-[10px] text-slate-400 px-4 font-bold italic uppercase tracking-widest">No external sources</p>}
             </div>
           </div>
         </div>

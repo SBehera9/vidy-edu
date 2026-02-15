@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { fetchJobNotifications, fetchExamUpdates } from '../services/eduService';
 import { JobNotification, AdmitCardResult } from '../types';
@@ -91,7 +90,7 @@ const JobSection: React.FC = () => {
                <CloudOff className="w-12 h-12 sm:w-20 sm:h-20 text-rose-300 mx-auto mb-4 sm:mb-8" />
                <h3 className="text-xl sm:text-2xl font-extrabold text-rose-900 mb-2 sm:mb-4 tracking-tight">Sync Failure</h3>
                <p className="text-rose-600 text-[10px] sm:text-base font-medium max-w-xs sm:max-w-md mx-auto mb-8">
-                 We couldn't reach the AI sync server. Please ensure the API_KEY is correctly set in Vercel and redeploy.
+                 Unable to load data. Please try again.
                </p>
                <button onClick={loadData} className="px-8 sm:px-12 py-3 sm:py-5 bg-rose-600 text-white rounded-xl sm:rounded-2xl font-black uppercase text-[8px] sm:text-[10px] tracking-widest hover:bg-rose-700 transition-all shadow-lg">Try Again</button>
             </div>

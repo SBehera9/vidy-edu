@@ -1,4 +1,3 @@
-
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { RefreshCcw, Home, ShieldAlert } from 'lucide-react';
 
@@ -13,15 +12,11 @@ interface State {
   error?: Error;
 }
 
-/**
- * World-class Error Boundary with empathetic UI and multi-path recovery.
- */
 class ErrorBoundary extends Component<Props, State> {
   public state: State = {
     hasError: false
   };
 
-  // Explicit constructor ensuring props are passed to the base Component class.
   constructor(props: Props) {
     super(props);
   }
@@ -30,9 +25,7 @@ class ErrorBoundary extends Component<Props, State> {
     return { hasError: true, error };
   }
 
-  // Lifecycle method to catch errors in the component tree.
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    // Accessing this.props now correctly inherited from Component.
     console.error(`[ErrorBoundary] Caught error in ${this.props.sectionName || 'Component'}:`, error, errorInfo);
   }
 
@@ -41,12 +34,10 @@ class ErrorBoundary extends Component<Props, State> {
   };
 
   public render() {
-    // Accessing this.state inherited from the base class.
     if (this.state.hasError) {
       return (
         <div className="min-h-[60vh] flex items-center justify-center p-6 animate-in fade-in zoom-in-95 duration-500">
           <div className="max-w-2xl w-full bg-white rounded-[3.5rem] shadow-2xl shadow-slate-200 border border-slate-100 overflow-hidden relative">
-            {/* Decorative elements */}
             <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-rose-400 via-indigo-500 to-blue-500"></div>
             <div className="absolute -top-24 -right-24 w-64 h-64 bg-rose-50 rounded-full blur-3xl opacity-50"></div>
             
@@ -60,7 +51,6 @@ class ErrorBoundary extends Component<Props, State> {
               </h2>
               
               <p className="text-slate-500 text-lg font-medium mb-10 leading-relaxed max-w-md mx-auto">
-                {/* Accessing this.props.sectionName from inherited props. */}
                 The <span className="font-bold text-slate-800">{this.props.sectionName || 'requested module'}</span> encountered a technical sync issue. Our engineers have been notified.
               </p>
 
@@ -82,7 +72,7 @@ class ErrorBoundary extends Component<Props, State> {
 
               <div className="mt-12 pt-8 border-t border-slate-50">
                 <p className="text-[9px] font-black text-slate-300 uppercase tracking-[0.3em]">
-                  Diagnostic ID: {Math.random().toString(36).substring(7).toUpperCase()} • EduIndia Gateway Protection
+                  Diagnostic ID: {Math.random().toString(36).substring(7).toUpperCase()} • Vidy Gateway Protection
                 </p>
               </div>
             </div>
@@ -91,7 +81,6 @@ class ErrorBoundary extends Component<Props, State> {
       );
     }
 
-    // Accessing this.props.children from inherited props.
     return this.props.children;
   }
 }

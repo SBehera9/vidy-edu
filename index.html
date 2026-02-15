@@ -1,14 +1,11 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#4F46E5">
     
-    <!-- SEO Meta Tags -->
     <title>Vidy | India's #1 Student Success Portal</title>
     <meta name="description" content="Free educational portal for Indian students. Get real-time job alerts, official syllabus, and AI-powered academic research.">
     
@@ -85,24 +82,28 @@
         }
 
         .btn-shine:hover::after { opacity: 1; left: 100%; top: 100%; }
+        
+        @keyframes fade-in {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slide-in-from-bottom {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .animate-in {
+            animation-duration: 0.5s;
+            animation-fill-mode: both;
+        }
+        
+        .fade-in { animation-name: fade-in; }
+        .slide-in-from-bottom-8 { animation-name: slide-in-from-bottom; }
     </style>
-<script type="importmap">
-{
-  "imports": {
-    "react/": "https://esm.sh/react@^19.2.4/",
-    "react": "https://esm.sh/react@^19.2.4",
-    "@google/genai": "https://esm.sh/@google/genai@^1.39.0",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
-    "lucide-react": "https://esm.sh/lucide-react@^0.563.0",
-    "react-markdown": "https://esm.sh/react-markdown@^9.0.0",
-    "remark-gfm": "https://esm.sh/remark-gfm@^4.0.0"
-  }
-}
-</script>
-<link rel="stylesheet" href="/index.css">
 </head>
 <body class="selection:bg-indigo-600 selection:text-white">
     <div id="root"></div>
-<script type="module" src="/index.tsx"></script>
+    <script type="module" src="/src/index.tsx"></script>
 </body>
 </html>

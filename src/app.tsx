@@ -13,25 +13,14 @@ import {
   ShieldCheck,
   HelpCircle,
   MessageSquare,
-  AlertTriangle,
-  RefreshCw,
   Zap
 } from "lucide-react";
 
 const App: React.FC = () => {
   const [currentSection, setSection] = useState<Section>(Section.HOME);
-  const [isKeyMissing, setIsKeyMissing] = useState(false);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
-
-    // ✅ VITE-SAFE ENV CHECK
-    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-    if (!apiKey || apiKey === "undefined") {
-      setIsKeyMissing(true);
-    } else {
-      setIsKeyMissing(false);
-    }
   }, [currentSection]);
 
   const renderStaticPage = (
@@ -91,35 +80,80 @@ const App: React.FC = () => {
         return renderStaticPage(
           "About Vidy",
           Info,
-          <p>Vidy is a non-profit educational gateway for Indian students.</p>
+          <div className="space-y-4">
+            <p>Vidy is a non-profit educational gateway for Indian students, providing free access to:</p>
+            <ul className="list-disc pl-6 space-y-2">
+              <li>Real-time government job notifications</li>
+              <li>Official syllabus and curriculum downloads</li>
+              <li>AI-powered academic research tools</li>
+              <li>Latest education news and exam updates</li>
+            </ul>
+            <p>All services are completely free and always will be.</p>
+          </div>
         );
 
       case Section.TERMS:
         return renderStaticPage(
-          "Terms",
+          "Terms of Use",
           Scale,
-          <p>Standard terms of use for educational resources.</p>
+          <div className="space-y-4">
+            <p>By using Vidy, you agree to:</p>
+            <ul className="list-disc pl-6 space-y-2">
+              <li>Use the platform for personal educational purposes only</li>
+              <li>Not attempt to copy or misuse the content</li>
+              <li>Respect intellectual property rights</li>
+              <li>Report any issues to our support team</li>
+            </ul>
+          </div>
         );
 
       case Section.PRIVACY:
         return renderStaticPage(
-          "Privacy",
+          "Privacy Policy",
           ShieldCheck,
-          <p>We do not store or sell student data.</p>
+          <div className="space-y-4">
+            <p>We respect your privacy:</p>
+            <ul className="list-disc pl-6 space-y-2">
+              <li>No personal data is stored on our servers</li>
+              <li>We use cookies only for essential functionality</li>
+              <li>Your search queries are anonymous</li>
+              <li>We never sell or share your information</li>
+            </ul>
+          </div>
         );
 
       case Section.FAQ:
         return renderStaticPage(
-          "FAQs",
+          "Frequently Asked Questions",
           HelpCircle,
-          <p>Common questions about Vidy services.</p>
+          <div className="space-y-6">
+            <div>
+              <h3 className="font-bold text-slate-900 mb-2">Is Vidy really free?</h3>
+              <p>Yes, completely free for all Indian students. No hidden charges.</p>
+            </div>
+            <div>
+              <h3 className="font-bold text-slate-900 mb-2">How accurate is the job data?</h3>
+              <p>We source information directly from official government websites and verify regularly.</p>
+            </div>
+            <div>
+              <h3 className="font-bold text-slate-900 mb-2">Do I need to create an account?</h3>
+              <p>No account needed. All features are accessible without registration.</p>
+            </div>
+          </div>
         );
 
       case Section.CONTACT_PAGE:
         return renderStaticPage(
-          "Support",
+          "Contact Support",
           MessageSquare,
-          <p>Contact our helpdesk for assistance.</p>
+          <div className="space-y-4">
+            <p>Need help? Reach out to us:</p>
+            <ul className="list-disc pl-6 space-y-2">
+              <li>Email: support@vidy.edu.in</li>
+              <li>WhatsApp: +91 9876543210</li>
+              <li>Response time: Within 24 hours</li>
+            </ul>
+          </div>
         );
 
       default:
@@ -136,20 +170,20 @@ const App: React.FC = () => {
               </h1>
 
               <p className="text-lg sm:text-2xl text-slate-500 max-w-2xl mx-auto mb-16">
-                Verified jobs, official syllabus, and AI research tools — free
+                Verified jobs, official syllabus, and research tools — free
                 for every student.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-6 justify-center">
                 <button
                   onClick={() => setSection(Section.JOBS)}
-                  className="px-12 py-6 bg-slate-900 text-white rounded-[2rem] font-black uppercase tracking-widest"
+                  className="px-12 py-6 bg-slate-900 text-white rounded-[2rem] font-black uppercase tracking-widest hover:bg-indigo-600 transition-all"
                 >
                   Browse Jobs
                 </button>
                 <button
                   onClick={() => setSection(Section.SEARCH)}
-                  className="px-12 py-6 bg-white border rounded-[2rem] font-black uppercase tracking-widest"
+                  className="px-12 py-6 bg-white border rounded-[2rem] font-black uppercase tracking-widest hover:bg-slate-50 transition-all"
                 >
                   Research Lab
                 </button>
@@ -162,26 +196,13 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      {isKeyMissing && (
-        <div className="fixed top-0 left-0 w-full z-[1000] bg-rose-600 text-white p-3 text-center text-[10px] font-bold uppercase tracking-widest flex items-center justify-center gap-4">
-          <AlertTriangle className="w-4 h-4" />
-          API key not configured. Results will not load.
-          <button
-            onClick={() => window.location.reload()}
-            className="bg-white/20 px-3 py-1 rounded-md flex items-center gap-2"
-          >
-            <RefreshCw className="w-3 h-3" /> Retry
-          </button>
-        </div>
-      )}
-
       <Navbar currentSection={currentSection} setSection={setSection} />
       <QuickContact />
       <main className="flex-grow pt-10">{renderSection()}</main>
 
       <footer className="bg-slate-950 py-20 px-6 text-white text-center">
         <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
-          © 2025 VIDY PROFESSIONAL EDUCATIONAL SERVICES
+          © 2026 VIDY PROFESSIONAL EDUCATIONAL SERVICES
         </p>
       </footer>
     </div>

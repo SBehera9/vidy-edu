@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { fetchSyllabusByCategory } from '../services/eduService';
 import { AdmitCardResult } from '../types';
@@ -121,7 +120,7 @@ const SyllabusSection: React.FC<SyllabusSectionProps> = ({ onOpenLab }) => {
             <div className="py-20 sm:py-40 text-center bg-rose-50 rounded-[2rem] sm:rounded-[4rem] border border-rose-100">
               <CloudOff className="w-12 h-12 sm:w-20 sm:h-20 text-rose-300 mx-auto mb-6 sm:mb-8" />
               <h3 className="text-2xl sm:text-3xl font-black text-rose-900 mb-2 sm:mb-4">Connection Failed</h3>
-              <p className="text-rose-600 text-xs sm:text-base font-medium max-w-xs sm:max-w-sm mx-auto mb-8">We couldn't reach the curriculum server. Check your API Key.</p>
+              <p className="text-rose-600 text-xs sm:text-base font-medium max-w-xs sm:max-w-sm mx-auto mb-8">Unable to load syllabus data.</p>
               <button onClick={refreshListing} className="px-8 sm:px-12 py-4 bg-rose-600 text-white rounded-xl font-bold uppercase text-[9px] tracking-widest">Retry Connection</button>
             </div>
           ) : data.length === 0 ? (
@@ -166,7 +165,7 @@ const SyllabusSection: React.FC<SyllabusSectionProps> = ({ onOpenLab }) => {
             <div className="absolute top-0 right-0 w-48 sm:w-96 h-48 sm:h-96 bg-indigo-500/10 rounded-full blur-[60px] sm:blur-[100px]"></div>
             <div className="relative z-10 max-w-2xl text-left">
                <h4 className="text-2xl sm:text-5xl font-black text-white mb-4 sm:mb-8 tracking-tight">Custom Research</h4>
-               <p className="text-slate-400 text-sm sm:text-xl font-medium mb-8 sm:mb-12">Search any school or university curriculum in real-time using AI Intelligence.</p>
+               <p className="text-slate-400 text-sm sm:text-xl font-medium mb-8 sm:mb-12">Search any school or university curriculum in real-time using our research tools.</p>
                <button 
                 onClick={onOpenLab} 
                 className="px-8 sm:px-12 py-4 sm:py-6 bg-white text-slate-900 rounded-xl sm:rounded-[2rem] font-black uppercase text-[9px] sm:text-[11px] tracking-[0.3em] hover:bg-indigo-600 hover:text-white transition-all shadow-2xl"

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { MessageSquare, X, User, Phone, Send, CheckCircle2, MessageCircle, ChevronLeft, ShieldCheck } from 'lucide-react';
 
@@ -36,8 +35,8 @@ const ContactSidebar: React.FC = () => {
   };
 
   const handleWhatsApp = () => {
-    const message = encodeURIComponent("Hello IndiaScholar Hub, I am searching for academic help. Guide me.");
-    window.open(`https://wa.me/916742345678?text=${message}`, '_blank');
+    const message = encodeURIComponent("Hello Vidy Hub, I am searching for academic help. Guide me.");
+    window.open(`https://wa.me/919876543210?text=${message}`, '_blank');
   };
 
   return (
@@ -140,6 +139,13 @@ const ContactSidebar: React.FC = () => {
                           <Phone className="absolute left-5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-400" />
                           <input required type="tel" placeholder="+91" value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value})} className="w-full pl-12 sm:pl-14 pr-6 sm:pr-8 py-4 sm:py-5 bg-slate-50 border border-slate-100 rounded-xl sm:rounded-2xl focus:bg-white focus:border-indigo-600 outline-none font-bold text-xs sm:text-sm transition-all" />
                         </div>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-1.5">
+                      <label className="text-[8px] sm:text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-2">Email</label>
+                      <div className="relative">
+                        <input type="email" placeholder="email@example.com" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} className="w-full pl-6 pr-6 py-4 sm:py-5 bg-slate-50 border border-slate-100 rounded-xl sm:rounded-2xl focus:bg-white focus:border-indigo-600 outline-none font-bold text-xs sm:text-sm transition-all" />
                       </div>
                     </div>
                     
