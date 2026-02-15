@@ -5,8 +5,14 @@ import SearchSection from "./components/SearchSection";
 import JobSection from "./components/JobSection";
 import SyllabusSection from "./components/SyllabusSection";
 import NewsSection from "./components/NewsSection";
+import PrivacyPolicy from "./components/PrivacyPolicy";
+import TermsOfUse from "./components/TermsOfUse";
+import Disclaimer from "./components/Disclaimer";
+import FAQ from "./components/FAQ";
+import ContactPage from "./components/ContactPage";
 import ErrorBoundary from "./components/ErrorBoundary";
 import QuickContact from "./components/QuickContact";
+import Footer from "./components/Footer";
 import {
   Info,
   Scale,
@@ -76,6 +82,41 @@ const App: React.FC = () => {
           </ErrorBoundary>
         );
 
+      case Section.PRIVACY:
+        return (
+          <ErrorBoundary sectionName="Privacy Policy">
+            <PrivacyPolicy />
+          </ErrorBoundary>
+        );
+
+      case Section.TERMS:
+        return (
+          <ErrorBoundary sectionName="Terms of Use">
+            <TermsOfUse />
+          </ErrorBoundary>
+        );
+
+      case Section.DISCLAIMER:
+        return (
+          <ErrorBoundary sectionName="Disclaimer">
+            <Disclaimer />
+          </ErrorBoundary>
+        );
+
+      case Section.FAQ:
+        return (
+          <ErrorBoundary sectionName="FAQ">
+            <FAQ />
+          </ErrorBoundary>
+        );
+
+      case Section.CONTACT_PAGE:
+        return (
+          <ErrorBoundary sectionName="Contact Us">
+            <ContactPage />
+          </ErrorBoundary>
+        );
+
       case Section.ABOUT:
         return renderStaticPage(
           "About Vidy",
@@ -89,70 +130,6 @@ const App: React.FC = () => {
               <li>Latest education news and exam updates</li>
             </ul>
             <p>All services are completely free and always will be.</p>
-          </div>
-        );
-
-      case Section.TERMS:
-        return renderStaticPage(
-          "Terms of Use",
-          Scale,
-          <div className="space-y-4">
-            <p>By using Vidy, you agree to:</p>
-            <ul className="list-disc pl-6 space-y-2">
-              <li>Use the platform for personal educational purposes only</li>
-              <li>Not attempt to copy or misuse the content</li>
-              <li>Respect intellectual property rights</li>
-              <li>Report any issues to our support team</li>
-            </ul>
-          </div>
-        );
-
-      case Section.PRIVACY:
-        return renderStaticPage(
-          "Privacy Policy",
-          ShieldCheck,
-          <div className="space-y-4">
-            <p>We respect your privacy:</p>
-            <ul className="list-disc pl-6 space-y-2">
-              <li>No personal data is stored on our servers</li>
-              <li>We use cookies only for essential functionality</li>
-              <li>Your search queries are anonymous</li>
-              <li>We never sell or share your information</li>
-            </ul>
-          </div>
-        );
-
-      case Section.FAQ:
-        return renderStaticPage(
-          "Frequently Asked Questions",
-          HelpCircle,
-          <div className="space-y-6">
-            <div>
-              <h3 className="font-bold text-slate-900 mb-2">Is Vidy really free?</h3>
-              <p>Yes, completely free for all Indian students. No hidden charges.</p>
-            </div>
-            <div>
-              <h3 className="font-bold text-slate-900 mb-2">How accurate is the job data?</h3>
-              <p>We source information directly from official government websites and verify regularly.</p>
-            </div>
-            <div>
-              <h3 className="font-bold text-slate-900 mb-2">Do I need to create an account?</h3>
-              <p>No account needed. All features are accessible without registration.</p>
-            </div>
-          </div>
-        );
-
-      case Section.CONTACT_PAGE:
-        return renderStaticPage(
-          "Contact Support",
-          MessageSquare,
-          <div className="space-y-4">
-            <p>Need help? Reach out to us:</p>
-            <ul className="list-disc pl-6 space-y-2">
-              <li>Email: support@vidy.edu.in</li>
-              <li>WhatsApp: +91 9876543210</li>
-              <li>Response time: Within 24 hours</li>
-            </ul>
           </div>
         );
 
@@ -199,12 +176,7 @@ const App: React.FC = () => {
       <Navbar currentSection={currentSection} setSection={setSection} />
       <QuickContact />
       <main className="flex-grow pt-10">{renderSection()}</main>
-
-      <footer className="bg-slate-950 py-20 px-6 text-white text-center">
-        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
-          © 2026 VIDY PROFESSIONAL EDUCATIONAL SERVICES
-        </p>
-      </footer>
+      <Footer onNavigate={(section) => setSection(section as Section)} />
     </div>
   );
 };
