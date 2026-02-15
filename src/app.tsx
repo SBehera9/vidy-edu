@@ -13,6 +13,7 @@ import ContactPage from "./components/ContactPage";
 import ErrorBoundary from "./components/ErrorBoundary";
 import QuickContact from "./components/QuickContact";
 import Footer from "./components/Footer";
+import HomePage from "./components/HomePage";
 import {
   Info,
   Scale,
@@ -36,15 +37,15 @@ const App: React.FC = () => {
   ) => (
     <div className="max-w-5xl mx-auto py-16 sm:py-32 px-4 sm:px-6 animate-in fade-in slide-in-from-bottom-8 duration-1000">
       <div className="flex items-center gap-3 mb-6 sm:mb-10 text-indigo-600 font-bold text-[10px] sm:text-[11px] uppercase tracking-[0.3em]">
-        <div className="p-2 bg-indigo-50 rounded-lg">
+        <div className="p-2 bg-gradient-to-br from-indigo-500 to-purple-600 text-white rounded-lg shadow-lg">
           {React.createElement(icon, { className: "w-4 h-4" })}
         </div>
         {title}
       </div>
-      <h2 className="text-4xl sm:text-8xl font-extrabold text-slate-900 mb-10 sm:mb-16 tracking-tight">
+      <h2 className="text-4xl sm:text-8xl font-extrabold text-slate-900 mb-10 sm:mb-16 tracking-tight bg-gradient-to-r from-slate-900 to-indigo-600 bg-clip-text text-transparent">
         {title}
       </h2>
-      <div className="bg-white border border-slate-100 rounded-[2rem] sm:rounded-[3.5rem] p-6 sm:p-20 shadow-xl shadow-slate-200/50">
+      <div className="bg-white/80 backdrop-blur-xl border border-slate-100 rounded-[2rem] sm:rounded-[3.5rem] p-6 sm:p-20 shadow-2xl shadow-indigo-500/10 hover:shadow-indigo-500/20 transition-all duration-500">
         <div className="prose prose-slate prose-lg sm:prose-xl max-w-none text-slate-600 font-medium">
           {content}
         </div>
@@ -135,44 +136,15 @@ const App: React.FC = () => {
 
       default:
         return (
-          <section className="relative pt-32 pb-24 px-6 hero-mesh">
-            <div className="max-w-7xl mx-auto text-center">
-              <div className="inline-flex items-center gap-2 px-6 py-2 bg-white border rounded-full text-indigo-600 text-[10px] font-bold uppercase tracking-widest mb-12">
-                <Zap className="w-3 h-3 fill-indigo-500" />
-                All-India Student Gateway
-              </div>
-
-              <h1 className="text-5xl sm:text-9xl font-black text-slate-900 mb-8">
-                Master Your <span className="text-indigo-600">Future</span>
-              </h1>
-
-              <p className="text-lg sm:text-2xl text-slate-500 max-w-2xl mx-auto mb-16">
-                Verified jobs, official syllabus, and research tools — free
-                for every student.
-              </p>
-
-              <div className="flex flex-col sm:flex-row gap-6 justify-center">
-                <button
-                  onClick={() => setSection(Section.JOBS)}
-                  className="px-12 py-6 bg-slate-900 text-white rounded-[2rem] font-black uppercase tracking-widest hover:bg-indigo-600 transition-all"
-                >
-                  Browse Jobs
-                </button>
-                <button
-                  onClick={() => setSection(Section.SEARCH)}
-                  className="px-12 py-6 bg-white border rounded-[2rem] font-black uppercase tracking-widest hover:bg-slate-50 transition-all"
-                >
-                  Research Lab
-                </button>
-              </div>
-            </div>
-          </section>
+          <ErrorBoundary sectionName="Home">
+            <HomePage setSection={setSection} />
+          </ErrorBoundary>
         );
     }
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50/30 flex flex-col">
       <Navbar currentSection={currentSection} setSection={setSection} />
       <QuickContact />
       <main className="flex-grow pt-10">{renderSection()}</main>
